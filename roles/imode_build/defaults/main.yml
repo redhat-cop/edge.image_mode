@@ -1,0 +1,60 @@
+---
+# defaults file for imode_build
+
+imode_build_directory: "{{ imode_directory | default('~/ImageMode') }}"
+
+# List of images to build
+# Available options:
+#   name (mandatory) - unique name, fit for naming directories and containers
+#   template (mandatory) - template to create a Containerfile
+#   base_image (mandatory) - which container image to build upon
+#   target_image (mandatory) - which container image to build (without tag)
+#   tags (mandatory) - list of tag(s) to tag the target image with, 1st one being version
+#   copy_dir (optional) - directory with files to copy for use in Containerfile
+#   target_type (optional, default 'qcow2') - as per bootc-image-builder --type
+#   dict_vars (optional) - a dictionary of variables to use in the template
+imode_build_containers:
+  - name: rhde
+    template: Containerfile.rhde.j2
+    copy_dir: "{{ playbook_dir }}/files/rhde/"  # ending with / so that only content is copied
+    base_image: "registry.redhat.io/rhel9/rhel-bootc:9.5"
+    target_image: "quay.io/redhat_emp1/ericzolf-rhde"
+    tags: [v1.0.0, v1.0, v1, latest]
+    dict_vars:
+      rhem: true  # install Flightctl aka Red Hat Edge Manager
+  - name: microshift
+    template: Containerfile.microshift.j2
+    copy_dir: "{{ playbook_dir }}/files/microshift/"  # ending with / so that only content is copied
+    base_image: "registry.redhat.io/rhel9/rhel-bootc:9.5"
+    target_image: "quay.io/redhat_emp1/ericzolf-microshift"
+    tags: [v4.17.0, v4.17, v4, latest]
+
+# We can use this variable to limit which containers to build based on their name,
+# it is hence a list of names from the above list.
+imode_build_list: "{{ imode_build_containers | map(attribute='name') }}"
+
+# Force creation of containers even if the Containerfile didn't change
+# Will still always tag and push images to allow for re-tagging after tests
+imode_build_containers_force: "{{ imode_containers_force | default(false) }}"
+
+# For security reasons, we logout by default after each use of the registry.
+imode_build_registry_logout: true
+
+# Shall we push images to the registry or keep them local?
+# Note that images will only be pushed to registries listed in imode_build_registry_auths.
+imode_build_registry_push: true
+
+# A dictionary of registry authentications keyed by registry hostname.
+# If a hostname is not in this list, it's deemed not being a real registry (e.g. localhost)
+imode_build_registry_auths: "{{ imode_registry_auths | default([]) }}"
+# imode_build_registry_auths:
+#   quay.io:
+#     username: MYUSERNAME
+#     password: MYPASSWORD
+#   registry.redhat.io:
+#     secret: MYPODMANSECRET
+#   my.local.registry:
+#     username: MYUSERNAME
+#     password: MYPASSWORD
+#     tlsverify: false
+#   my.unsecure.registry:  # no login/logout required, but push/pull is possible

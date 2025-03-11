@@ -1,0 +1,7 @@
+FROM {{ imode_tmpl_base_image }}
+
+COPY --chmod=0640 secret.myown.json /usr/local/etc/crio/openshift-pull-secret
+COPY --chmod=0640 auth.myown.json /usr/local/etc/ostree/auth.json
+COPY --chmod=0755 fix-image-mode.sh /usr/local/sbin/fix-image-mode.sh
+COPY --chmod=0644 fix-image-mode.service /usr/local/lib/systemd/system/fix-image-mode.service
+RUN systemctl enable fix-image-mode.service

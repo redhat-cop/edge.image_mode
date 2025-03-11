@@ -1,0 +1,13 @@
+---
+# tasks file for imode_build
+- name: Make sure base directory exists
+  ansible.builtin.file:
+    path: "{{ imode_convert_directory }}"
+    state: directory
+    recurse: true
+- name: Loop through the container images
+  ansible.builtin.include_tasks:
+    file: convert.yml
+  loop: "{{ imode_convert_images | selectattr('name', 'in', imode_convert_list) }}"
+  loop_control:
+    loop_var: __imode_convert_item

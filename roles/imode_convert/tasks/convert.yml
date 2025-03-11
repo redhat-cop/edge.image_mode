@@ -1,0 +1,93 @@
+---
+- name: convert | Define variable for container base directory
+  # we use expanduser to expand tilde as the normal user, not root later on
+  ansible.builtin.set_fact:
+    __imode_convert_base_dir: "{{ imode_convert_directory | expanduser }}/{{ __imode_convert_item.name }}"
+    __imode_convert_image: "{{ __imode_convert_item.source_image }}:{{ __imode_convert_item.source_tag | default('latest') }}"
+    __imode_convert_tag: "{{ __imode_convert_item.source_tag | default('latest') }}"
+- name: convert | Make sure base directory does exist
+  ansible.builtin.file:
+    path: "{{ __imode_convert_base_dir }}"
+    state: directory
+- name: convert | Define variable for blueprint file
+  ansible.builtin.set_fact:
+    # the splitext are there to get the json extension in e.g. blueprint.mine.json.j2
+    __imode_convert_file: "{{ __imode_convert_base_dir }}/blueprint.{{ __imode_convert_tag }}{{ ((__imode_convert_item.blueprint | splitext)[0] | splitext)[1] }}"
+  when:
+    - __imode_convert_item.blueprint is defined
+- name: convert | Create versioned blueprint from template
+  ansible.builtin.template:
+    src: "{{ __imode_convert_item.blueprint }}"
+    dest: "{{ __imode_convert_file }}"
+  when:
+    - __imode_convert_item.blueprint is defined
+
+- name: convert | Copy local files remotely if required
+  ansible.builtin.copy:
+    src: "{{ __imode_convert_item.copy_dir }}"
+    dest: "{{ __imode_convert_base_dir }}"
+  when:
+    - __imode_convert_item.copy_dir is defined
+  register: __imode_convert_copy_dir
+
+- name: convert | Login to necessary registries
+  containers.podman.podman_login:
+    username: "{{ imode_convert_registry_auths[item]['username'] | default(omit) }}"
+    password: "{{ imode_convert_registry_auths[item]['password'] | default(omit) }}"
+    secret: "{{ imode_convert_registry_auths[item]['secret'] | default(omit) }}"
+    tlsverify: "{{ imode_convert_registry_auths[item]['tlsverify'] | default(omit) }}"
+    registry: "{{ item }}"
+  # Making sure we login only once for each registry involved
+  loop: "{{ [ (__imode_convert_item.source_image | split('/'))[0], (imode_convert_builder | split('/'))[0] ] | unique }}"
+  when:
+    - imode_convert_registry_auths[item] is defined
+    - imode_convert_registry_auths[item]  # is not empty
+  changed_when: false  # we don't care
+  become: true
+
+- name: convert | Pre-load the bootable container image
+  containers.podman.podman_image:
+    name: "{{ __imode_convert_image }}"
+    pull: true
+    force: "{{ imode_convert_containers_force }}"
+  become: true
+  when:
+    - imode_convert_registry_pull
+    - imode_convert_registry_auths[(__imode_convert_item.source_image | split('/'))[0]] is defined
+
+- name: convert | Patch the bootable container image if necessary
+  ansible.builtin.include_tasks:
+    file: patch.yml
+  when:
+    - __imode_convert_item.patch is defined
+
+- name: convert | Convert the bootable container image
+  ansible.builtin.command:
+    cmd: >-
+      {{ lookup('ansible.builtin.template', __imode_convert_item.command | default('bootc-image-builder.j2')) }}
+    chdir: "{{ __imode_convert_base_dir }}"
+  vars:  # there might be more variables needed in the template
+    imode_tmpl_source_image: "{{ __imode_convert_item.source_image }}"
+    imode_tmpl_source_tag: "{{ __imode_convert_tag }}"
+    imode_tmpl_target_type: "{{ __imode_convert_item.target_type | default('qcow2') }}"
+    imode_tmpl_blueprint: "{{ __imode_convert_file | default('') }}"
+    imode_tmpl_vars: "{{ __imode_convert_item.dict_vars | default({}) }}"
+  become: true
+
+- name: convert | Logout from necessary registries (for security reasons)
+  containers.podman.podman_logout:
+    registry: "{{ item }}"
+  # Making sure we logout only once for each registry involved
+  loop: "{{ [ (__imode_convert_item.source_image | split('/'))[0], (imode_convert_builder | split('/'))[0] ] | unique }}"
+  when:
+    - imode_convert_registry_logout
+    - imode_convert_registry_auths[item] is defined
+    - imode_convert_registry_auths[item]  # is not empty
+  changed_when: false  # we don't care
+  become: true
+
+- name: convert | Remove the patched bootable container image if necessary
+  ansible.builtin.include_tasks:
+    file: unpatch.yml
+  when:
+    - __imode_convert_item.patch is defined

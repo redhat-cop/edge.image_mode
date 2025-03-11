@@ -1,0 +1,16 @@
+{
+  "blueprint": {
+    "customizations": {
+      "user": [
+        {
+          "name": "{{ imod_tmpl_username }}",
+          "password": "{{ imod_tmpl_password }}",
+          "key": "{{ imod_tmpl_ssh_pubkey }}",
+          "groups": [
+            "wheel"
+          ]
+        }
+      ]
+    }
+  }
+}

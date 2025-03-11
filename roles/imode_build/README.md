@@ -1,5 +1,5 @@
-Edge.Image_mode Run Role
-========================
+Role Name
+=========
 
 A brief description of the role goes here.
 
@@ -23,32 +23,13 @@ Example Playbook
 
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
-```yaml
-- name: Execute tasks on servers
-  hosts: servers
-  roles:
-    - role: edge.image_mode.run
-      run_x: 42
-```
-
-Another way to consume this role would be:
-
-```yaml
-- name: Initialize the run role from edge.image_mode
-  hosts: servers
-  gather_facts: false
-  tasks:
-    - name: Trigger invocation of run role
-      ansible.builtin.include_role:
-        name: edge.image_mode.run
-      vars:
-        run_x: 42
-```
+    - hosts: servers
+      roles:
+         - { role: username.rolename, x: 42 }
 
 License
 -------
 
-# TO-DO: Update the license to the one you want to use (delete this line after setting the license)
 BSD
 
 Author Information

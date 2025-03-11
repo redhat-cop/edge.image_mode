@@ -1,0 +1,12 @@
+podman run --rm --privileged
+	--volume .:/output
+	--volume /var/lib/containers/storage:/var/lib/containers/storage
+{% if imode_tmpl_blueprint %}
+	--volume {{ imode_tmpl_blueprint }}:/{{ imode_tmpl_blueprint | basename }}
+{% endif %}
+	{{ imode_convert_builder }} build --local
+	--type {{ imode_tmpl_target_type }}
+{% if imode_tmpl_blueprint %}
+	--config /{{ imode_tmpl_blueprint | basename }}
+{% endif %}
+	{{ imode_tmpl_source_image }}:{{ imode_tmpl_source_tag }}

@@ -1,0 +1,44 @@
+---
+- name: patch | Define variable for container file and image
+  ansible.builtin.set_fact:
+    __imode_convert_patch: "{{ __imode_convert_base_dir }}/Containerpatch.{{ __imode_convert_tag }}"
+
+# We do the whole complicated thing with tagging-patching-untagging so that the
+# VM/HW image is created pointing to the correct image reference for further updates
+
+- name: patch | Tag the source container image with _BAK tag
+  containers.podman.podman_tag:
+    image: "{{ __imode_convert_image }}"
+    target_names:
+      - "{{ __imode_convert_image }}_BAK"
+  become: true
+
+- name: patch | Create versioned Containerpatch from template
+  ansible.builtin.template:
+    src: "{{ __imode_convert_item.patch }}"
+    dest: "{{ __imode_convert_patch }}"
+  register: __imode_convert_containerpatch
+  vars:
+    imode_tmpl_base_image: "{{ __imode_convert_image }}"
+    imode_tmpl_vars: "{{ __imode_convert_item.dict_vars | default({}) }}"
+    # IMPORTANT: further variables might be needed by the template!
+
+- name: patch | Build the container image
+  containers.podman.podman_image:
+    name: "{{ __imode_convert_image }}_{{ __imode_convert_item.name }}"
+    state: build
+    build:
+      file: "{{ __imode_convert_patch }}"
+      extra_args: "{{ __imode_convert_item.podman_build | default('') }}"
+    path: "{{ __imode_convert_base_dir }}"
+    pull: false
+    push: false
+    force: "{{ imode_convert_containers_force }}"
+  become: true
+
+- name: patch | Tag the created container image with original tag
+  containers.podman.podman_tag:
+    image: "{{ __imode_convert_image }}_{{ __imode_convert_item.name }}"
+    target_names:
+      - "{{ __imode_convert_image }}"
+  become: true

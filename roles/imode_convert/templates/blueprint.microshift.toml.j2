@@ -1,0 +1,22 @@
+[[customizations.disk.partitions]]
+type = "lvm"
+name = "mainvg"
+minsize = "30 GiB"
+
+[[customizations.disk.partitions.logical_volumes]]
+name = "rootlv"
+mountpoint = "/"
+label = "root"
+fs_type = "xfs"
+minsize = "10 GiB"
+
+[[customizations.disk.partitions.logical_volumes]]
+name = "swaplv"
+fs_type = "swap"
+minsize = "3 GiB"
+
+[[customizations.disk.partitions.logical_volumes]]
+name = "REMOVEME"
+label = "REMOVEME"
+fs_type = "swap"
+minsize = "5 GiB"

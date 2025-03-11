@@ -1,0 +1,15 @@
+---
+# vars file for imode_convert
+
+# Mapping between image type and artifact location/name
+# based on artifact mapping at
+# https://github.com/osbuild/bootc-image-builder/blob/main/test/test_build.py#L282
+__imode_convert_artifact_map:
+  qcow2: qcow2/disk.qcow2
+  ami: image/disk.raw
+  raw: image/disk.raw
+  vmdk: vmdk/disk.vmdk
+  vhd: vpc/disk.vhd
+  gce: gce/image.tar.gz
+  anaconda-iso: bootiso/install.iso
+  iso: bootiso/install.iso

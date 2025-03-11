@@ -1,0 +1,21 @@
+---
+# defaults file for imode_prepare (aka imode_prep)
+
+# name of collection to use fedora.linux_system_roles or redhat.rhel_system_roles
+imode_prep_system_roles_collection: "fedora.linux_system_roles"
+# variables rhc_state and rhc_repositories are set by this role
+# The variable rhc_auth must be set and possibly rhc_organization
+# but other rhc_... variables can also be set
+
+# install MicroShift, Fast Datapath and GitOps and in which version?
+imode_prep_microshift_state: enabled
+imode_prep_microshift_version: "{{ imode_microshift_version | default('4.17') }}"
+imode_prep_datapath_state: "{{ imode_prep_microshift_state }}"
+imode_prep_gitops_state: enabled
+imode_prep_gitops_version: "{{ imode_gitops_version | default('1.15') }}"
+
+# If your builder needs additional repositories, add them here
+imode_prep_addtl_repositories: []
+
+# If your builder needs additional RPMs, add them here
+imode_prep_addtl_rpms: []

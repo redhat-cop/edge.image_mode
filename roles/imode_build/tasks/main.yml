@@ -1,0 +1,13 @@
+---
+# tasks file for imode_build
+- name: Make sure base directory exists
+  ansible.builtin.file:
+    path: "{{ imode_build_directory }}"
+    state: directory
+    recurse: true
+- name: Loop through the container images
+  ansible.builtin.include_tasks:
+    file: create.yml
+  loop: "{{ imode_build_containers | selectattr('name', 'in', imode_build_list) }}"
+  loop_control:
+    loop_var: __imode_build_item

@@ -1,0 +1,14 @@
+FROM {{ imode_tmpl_base_image }}
+
+RUN dnf install -y httpd
+RUN echo "Hello Red Hat" > /var/www/html/index.html
+
+{% if imode_tmpl_vars.rhem | default(false) %}
+RUN dnf -y copr enable @redhat-et/flightctl epel-9-x86_64 && \
+    dnf -y install flightctl-agent; \
+    dnf -y clean all; \
+    systemctl enable flightctl-agent.service
+ADD agentconfig.myown.yaml /etc/flightctl/config.yaml
+{% endif %}
+
+RUN systemctl enable httpd.service

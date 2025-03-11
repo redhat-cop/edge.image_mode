@@ -1,0 +1,8 @@
+---
+# task file for imode_convert
+- name: unpatch | Un-tag the source container image with BAK tag
+  containers.podman.podman_tag:
+    image: "{{ __imode_convert_image }}_BAK"
+    target_names:
+      - "{{ __imode_convert_image }}"
+  become: true

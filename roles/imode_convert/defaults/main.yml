@@ -1,0 +1,59 @@
+---
+# defaults file for imode_convert
+imode_convert_directory: "{{ imode_directory | default('~/ImageMode') }}"
+
+# Container image to use for converting
+# imode_convert_builder: "registry.redhat.io/rhel9/bootc-image-builder:latest"
+# The disk extension to blueprint doesn't work yet with downstream, hence upstream
+imode_convert_builder: "quay.io/centos-bootc/bootc-image-builder:latest"
+
+# For security reasons, we logout by default after each use of the registry.
+imode_convert_registry_logout: true
+
+# Shall we pull images from the registry or assume they are local?
+# Note that images will only be pulled from registries listed in imode_convert_registry_auths.
+imode_convert_registry_pull: true
+
+# Shall we force pulling?
+imode_convert_containers_force: "{{ imode_containers_force | default(false) }}"
+
+# A dictionary of registry authentications keyed by registry hostname.
+# If a hostname is not in this list, it's deemed not being a real registry (e.g. localhost)
+imode_convert_registry_auths: "{{ imode_registry_auths | default([]) }}"
+# imode_convert_registry_auths:
+#   quay.io:
+#     username: MYUSERNAME
+#     password: MYPASSWORD
+#   registry.redhat.io:
+#     secret: MYPODMANSECRET
+#   my.local.registry:
+#     username: MYUSERNAME
+#     password: MYPASSWORD
+#     tlsverify: false
+#   my.unsecure.registry:  # no login/logout required, but push/pull is possible
+
+# List of images to convert
+# Available options:
+#   name (mandatory) - unique name, fit for naming directories and containers
+#   blueprint (optional) - template to create a blueprint config file (json or toml)
+#   patch (optional) - template to create a Containerfile to patch the source image
+#   copy_dir (optional) - directory with files to copy for use in Containerpatch
+#   source_image (mandatory) - which container image to convert
+#   source_tag (optional, default 'latest') - which container image's tag to convert
+#   target_type (optional, default 'qcow2') - as per bootc-image-builder --type
+#   dict_vars (optional) - a dictionary of variables to use in the template
+imode_convert_images:
+  - name: rhde
+    blueprint: blueprint.rhde.json.j2
+    source_image: quay.io/redhat_emp1/ericzolf-rhde
+    source_tag: v1.0.0
+    target_type: iso
+  - name: microshift
+    blueprint: blueprint.microshift.toml.j2
+    patch: Containerpatch.microshift.j2
+    source_image: quay.io/redhat_emp1/ericzolf-microshift
+    copy_dir: "{{ playbook_dir }}/files/microshift/"  # ending with / so that only content is copied
+
+# We can use this variable to limit which containers to convert based on their name,
+# it is hence a list of names from the above list.
+imode_convert_list: "{{ imode_convert_images | map(attribute='name') }}"

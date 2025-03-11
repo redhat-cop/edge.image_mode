@@ -2,17 +2,27 @@
 
 This repository contains the `edge.image_mode` Ansible Collection.
 
-<!--start requires_ansible-->
-<!--end requires_ansible-->
+The collection relies on [fedora.linux\_system\_roles](https://galaxy.ansible.com/ui/repo/published/fedora/linux_system_roles/) or [redhat.rhel\_system\_roles](https://console.redhat.com/ansible/automation-hub/repo/published/redhat/rhel_system_roles/), as well as [containers.podman](https://galaxy.ansible.com/ui/repo/published/containers/podman/).
 
 ## External requirements
 
-Some modules and plugins require external libraries. Please check the requirements for each plugin or module you use in the documentation to find out which requirements are needed.
+You will need a RHEL 9.5 (or higher) server to be used as builder host.
+On this node you will need to have a user with SSH access and root capabilities, usable with an Ansible become method.
+
+Furthermore you will need a container registry where you can push and pull images you'll create.
 
 ## Included content
 
-<!--start collection content-->
-<!--end collection content-->
+The basic idea is to have a collection around Image Mode aka bootc, covering the following actions:
+
+* Prepare a builder host where to build and convert bootc images
+* Build a bootable container image based on a Containerfile and (content) files, using podman build
+* Convert this image into a VM/HW image (qcow2, iso, etc) based on an optional blueprint, (other content) files and a configurable call to bootc-image-builder
+
+The builder host shall be mostly stateless so that it doesn't need to be backed-up, and we assume the existence of a container registry.
+
+> **NOTE:** the roles contain templates for Containerfile, Blueprint and the `bootc-image-builder` call, but those are only examples (to be extended), and templates local to the playbooks/Git repo could also be used.
+The content files copied are also expected to be in the Git repo, next to the playbooks.
 
 ## Using this collection
 

@@ -1,0 +1,41 @@
+FROM {{ imode_tmpl_base_image }}
+
+RUN dnf config-manager \
+        --set-enabled rhocp-{{ imode_microshift_version }}-for-rhel-9-$(uname -m)-rpms \
+        --set-enabled fast-datapath-for-rhel-9-$(uname -m)-rpms
+RUN dnf install -y firewalld microshift && \
+    systemctl enable microshift && \
+    dnf clean all
+
+{% if imode_tmpl_vars.rhem | default(false) %}
+RUN dnf -y copr enable @redhat-et/flightctl epel-9-x86_64 && \
+    dnf -y install flightctl-agent; \
+    dnf -y clean all; \
+    systemctl enable flightctl-agent.service
+ADD agentconfig.myown.yaml /etc/flightctl/config.yaml
+{% endif %}
+
+# Create a default 'redhat' user with the specified password.
+# Add it to the 'wheel' group to allow for running sudo commands.
+RUN useradd -m -d /var/home/redhat -G wheel redhat && \
+    echo "redhat:{{ ansible_password }}" | chpasswd
+
+# Mandatory firewall configuration
+RUN firewall-offline-cmd --zone=public --add-port=22/tcp && \
+    firewall-offline-cmd --zone=trusted --add-source=10.42.0.0/16 && \
+    firewall-offline-cmd --zone=trusted --add-source=169.254.169.1
+
+# Create a systemd unit to recursively make the root filesystem subtree
+# shared as required by OVN images
+RUN cat > /etc/systemd/system/microshift-make-rshared.service <<'EOF'
+[Unit]
+Description=Make root filesystem shared
+Before=microshift.service
+ConditionVirtualization=container
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/mount --make-rshared /
+[Install]
+WantedBy=multi-user.target
+EOF
+RUN systemctl enable microshift-make-rshared.service
