@@ -1,7 +1,7 @@
 ---
 # defaults file for imode_build
 
-imode_build_directory: "{{ imode_directory | default('~/ImageMode') }}"
+imode_build_directory: "{{ imode_directory | default('~/ImageMode') }}/Build"
 
 # List of images to build
 # Available options:
@@ -58,3 +58,7 @@ imode_build_registry_auths: "{{ imode_registry_auths | default([]) }}"
 #     password: MYPASSWORD
 #     tlsverify: false
 #   my.unsecure.registry:  # no login/logout required, but push/pull is possible
+
+# Access rights of files and templates copied, and directories
+imode_build_file_mode: "{{ imode_file_mode | default('u=rw,go=') }}"
+imode_build_dir_mode: "{{ imode_dir_mode | default('u=rwx,go=') }}"

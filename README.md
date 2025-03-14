@@ -73,6 +73,6 @@ See the [changelog](https://github.com/ansible-collections/edge.image_mode/tree/
 
 ## Licensing
 
-GNU General Public License v3.0 or later.
+BSD-3-Clause
 
-See [LICENSE](https://www.gnu.org/licenses/gpl-3.0.txt) to see the full text.
+See [LICENSE](https://opensource.org/license/BSD-3-clause) to see the full text.

@@ -7,6 +7,7 @@
   ansible.builtin.file:
     path: "{{ __imode_build_base_dir }}"
     state: directory
+    mode: "{{ imode_build_dir_mode }}"
 - name: create | Define variable for container file
   ansible.builtin.set_fact:
     __imode_build_file: "{{ __imode_build_base_dir }}/Containerfile.{{ __imode_build_item.tags[0] }}"
@@ -14,6 +15,7 @@
   ansible.builtin.template:
     src: "{{ __imode_build_item.template }}"
     dest: "{{ __imode_build_file }}"
+    mode: "{{ imode_build_file_mode }}"
   register: __imode_build_containerfile
   vars:
     imode_tmpl_base_image: "{{ __imode_build_item.base_image }}"
@@ -24,6 +26,8 @@
   ansible.builtin.copy:
     src: "{{ __imode_build_item['copy_dir'] }}"
     dest: "{{ __imode_build_base_dir }}"
+    mode: "{{ imode_build_file_mode }}"
+    directory_mode: "{{ imode_build_dir_mode }}"
   when:
     - __imode_build_item['copy_dir'] is defined
   register: __imode_build_copy_dir
@@ -36,7 +40,7 @@
     tlsverify: "{{ imode_build_registry_auths[item]['tlsverify'] | default(omit) }}"
     registry: "{{ item }}"
   # Making sure we login only once for each registry involved
-  loop: "{{ [ (__imode_build_item.base_image | split('/'))[0], (__imode_build_item.target_image | split('/'))[0] ] | unique }}"
+  loop: "{{ [(__imode_build_item.base_image | split('/'))[0], (__imode_build_item.target_image | split('/'))[0]] | unique }}"
   when:
     - imode_build_registry_auths[item] is defined
     - imode_build_registry_auths[item]  # is not empty
@@ -75,7 +79,7 @@
   containers.podman.podman_logout:
     registry: "{{ item }}"
   # Making sure we logout only once for each registry involved
-  loop: "{{ [ (__imode_build_item.base_image | split('/'))[0], (__imode_build_item.target_image | split('/'))[0] ] | unique }}"
+  loop: "{{ [(__imode_build_item.base_image | split('/'))[0], (__imode_build_item.target_image | split('/'))[0]] | unique }}"
   when:
     - imode_build_registry_logout
     - imode_build_registry_auths[item] is defined

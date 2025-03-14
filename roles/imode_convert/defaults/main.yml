@@ -1,6 +1,6 @@
 ---
 # defaults file for imode_convert
-imode_convert_directory: "{{ imode_directory | default('~/ImageMode') }}"
+imode_convert_directory: "{{ imode_directory | default('~/ImageMode') }}/Convert"
 
 # Container image to use for converting
 # imode_convert_builder: "registry.redhat.io/rhel9/bootc-image-builder:latest"
@@ -57,3 +57,7 @@ imode_convert_images:
 # We can use this variable to limit which containers to convert based on their name,
 # it is hence a list of names from the above list.
 imode_convert_list: "{{ imode_convert_images | map(attribute='name') }}"
+
+# Access rights of files and templates copied, and directories
+imode_convert_file_mode: "{{ imode_file_mode | default('u=rw,go=') }}"
+imode_convert_dir_mode: "{{ imode_dir_mode | default('u=rwx,go=') }}"

@@ -5,6 +5,7 @@
     path: "{{ imode_build_directory }}"
     state: directory
     recurse: true
+    mode: "{{ imode_build_dir_mode }}"
 - name: Loop through the container images
   ansible.builtin.include_tasks:
     file: create.yml

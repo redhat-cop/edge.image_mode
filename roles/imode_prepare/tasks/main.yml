@@ -2,12 +2,12 @@
 # tasks file for imode_prepare
 - name: Register to Red Hat CDN and enable the RPM repositories we need
   ansible.builtin.include_role:
-    name: "{{ imode_prep_system_roles_collection }}.rhc"
+    name: "{{ imode_prepare_system_roles_collection }}.rhc"
   vars:
     rhc_state: present
-    rhc_repositories: "{{ __imode_prep_rhc_repositories + imode_prep_addtl_repositories }}"
+    rhc_repositories: "{{ __imode_prepare_rhc_repositories + imode_prepare_addtl_repositories }}"
 - name: Install necessary and additional RPM packages
   ansible.builtin.dnf:
-    name: "{{ __imode_prep_rpms + imode_prep_addtl_rpms }}"
+    name: "{{ __imode_prepare_rpms + imode_prepare_addtl_rpms }}"
     state: present
   become: true

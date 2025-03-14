@@ -17,6 +17,7 @@
   ansible.builtin.template:
     src: "{{ __imode_convert_item.patch }}"
     dest: "{{ __imode_convert_patch }}"
+    mode: "{{ imode_convert_file_mode }}"
   register: __imode_convert_containerpatch
   vars:
     imode_tmpl_base_image: "{{ __imode_convert_image }}"

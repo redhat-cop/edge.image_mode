@@ -1,18 +1,18 @@
 ---
 # vars file for imode_prepare
 # List of necessary repositories
-__imode_prep_rhc_repositories:
+__imode_prepare_rhc_repositories:
   - name: "rhel-9-for-x86_64-baseos-rpms"
     state: enabled
   - name: "rhel-9-for-x86_64-appstream-rpms"
     state: enabled
-  - name: "rhocp-{{ imode_prep_microshift_version }}-for-rhel-9-x86_64-rpms"
-    state: "{{ imode_prep_microshift_state }}"
+  - name: "rhocp-{{ imode_prepare_microshift_version }}-for-rhel-9-x86_64-rpms"
+    state: "{{ imode_prepare_microshift_state }}"
   - name: "fast-datapath-for-rhel-9-x86_64-rpms"
-    state: "{{ imode_prep_datapath_state }}"
-  - name: "gitops-{{ imode_prep_gitops_version }}-for-rhel-9-x86_64-rpms"
-    state: "{{ imode_prep_gitops_state }}"
+    state: "{{ imode_prepare_datapath_state }}"
+  - name: "gitops-{{ imode_prepare_gitops_version }}-for-rhel-9-x86_64-rpms"
+    state: "{{ imode_prepare_gitops_state }}"
 
 # List of necessary rpms and groups
-__imode_prep_rpms:
+__imode_prepare_rpms:
   - podman  # or @container-management ?

@@ -1,10 +1,16 @@
 ---
 # tasks file for imode_build
+- name: Find out the correct user in case working on localhost
+  ansible.builtin.set_fact:  # localhost doesn't have an ansible_user by default
+    __imode_convert_user: "{{ ansible_user | default(lookup('env', 'USER')) }}"
 - name: Make sure base directory exists
   ansible.builtin.file:
     path: "{{ imode_convert_directory }}"
     state: directory
+    mode: "{{ imode_convert_dir_mode }}"
     recurse: true
+    owner: "{{ __imode_convert_user }}"
+  become: true  # because certain actions need to run as root
 - name: Loop through the container images
   ansible.builtin.include_tasks:
     file: convert.yml

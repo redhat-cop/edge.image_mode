@@ -1,6 +1,6 @@
 # hello_world.py - A custom filter plugin for Ansible.
 # Author: Your Name
-# License: GPL-3.0-or-later
+# License: 	BSD-3-Clause
 
 from __future__ import absolute_import, annotations, division, print_function
 
