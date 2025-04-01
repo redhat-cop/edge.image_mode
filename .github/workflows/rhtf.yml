@@ -25,9 +25,10 @@ jobs:
           tf_scope: private
           # TMT metadata
           tmt_plan_regex: "smoke"
-          tmt_path: "tests"
+          # tmt_path: "tests"
           # Test environment
           compose: RHEL-9.5.0-Nightly
+          secrets: "RHTF_INTERNAL_REPO=${{ secrets.RHTF_INTERNAL_REPO }}"
           # Test artifacts
           copr: epel-9-x86_64
           # Miscellaneous
