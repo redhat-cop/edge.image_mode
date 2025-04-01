@@ -1,0 +1,10 @@
+# copied from https://github.com/sclorg/testing-farm-as-github-action/tree/main/plans
+summary: Basic smoke test
+execute:
+  how: tmt
+  script: |
+    set +x
+    echo I am $(id)
+    echo I am placed at $(pwd)
+    find ..
+    sudo dnf repolist
